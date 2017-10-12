@@ -91,6 +91,14 @@ int main(int argc, char *argv[])
     delete outp;
 
     qDebug("Done");
+
+#ifdef Q_OS_WIN32
+    qDebug("You may use gzip to compress the output file");
+#else
+    system(QString("gzip -k \"%1\"").arg(output).toLatin1().data());
+    qDebug("Done compressing");
+#endif
+
     return 0;
 
     return a.exec();

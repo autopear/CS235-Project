@@ -31,7 +31,8 @@ def to_standard_path(path):
 dir_path = os.path.dirname(os.path.realpath(__file__))
 input_path = to_system_path("{0}/{1}".format("/".join(to_standard_path(dir_path).split("/")[0:-1]), input_file))
 if os.path.isfile(input_path):
-    out_file = open(to_system_path("{0}/output/extracted.tsv".format(dir_path)), "w")
+    output_path = to_system_path("{0}/output/extracted.tsv".format(dir_path))
+    out_file = open(output_path, "w")
 
     reviews_written = 0
     reviews_skipped = 0
@@ -65,5 +66,11 @@ if os.path.isfile(input_path):
     log_file.close()
 
     print("Done")
+
+    if os.name == "nt":
+        print("You may use gzip to compress the output file")
+    else:
+        os.system("gzip -k \"{0}\"".format(output_path))
+        print("Done compressing")
 else:
     print("Input file not found")
