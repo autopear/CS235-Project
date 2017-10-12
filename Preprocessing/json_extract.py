@@ -67,10 +67,6 @@ if os.path.isfile(input_path):
 
     print("Done")
 
-    if os.name == "nt":
-        print("You may use gzip to compress the output file")
-    else:
-        os.system("gzip -k \"{0}\"".format(output_path))
-        print("Done compressing")
+    print("You may zip the output file into multiple archives (Github does not support large file over 100MB")
 else:
     print("Input file not found")

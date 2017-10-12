@@ -92,12 +92,7 @@ int main(int argc, char *argv[])
 
     qDebug("Done");
 
-#ifdef Q_OS_WIN32
-    qDebug("You may use gzip to compress the output file");
-#else
-    system(QString("gzip -k \"%1\"").arg(output).toLatin1().data());
-    qDebug("Done compressing");
-#endif
+    qDebug("You may zip the output file into multiple archives (Github does not support large file over 100MB");
 
     return 0;
 

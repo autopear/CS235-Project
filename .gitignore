@@ -1,2 +1,5 @@
 .DS_Store
 ._*
+build-*-Debug
+build-*-Release
+*.pro.user
