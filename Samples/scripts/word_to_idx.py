@@ -1,3 +1,5 @@
+# Based on the word index map, convert all reviews to use word indices. Words without index will be skipped.
+
 
 import os
 
@@ -14,9 +16,10 @@ def to_standard_path(path):
 
 
 dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-input_path = to_system_path("{0}/samples.tsv".format("/".join(dir_path.split("/")[:-1])))
-map_path = to_system_path("{0}/word_map.tsv".format("/".join(dir_path.split("/")[:-1])))
-output_path = to_system_path("{0}/samples_indices.tsv".format("/".join(dir_path.split("/")[:-1])))
+dir_path = "/".join(dir_path.split("/")[:-1])
+input_path = to_system_path("{0}/samples.tsv".format(dir_path))
+map_path = to_system_path("{0}/word_map.tsv".format(dir_path))
+output_path = to_system_path("{0}/samples_indices.tsv".format(dir_path))
 
 word_map = {}
 with open(map_path, "r") as inf:

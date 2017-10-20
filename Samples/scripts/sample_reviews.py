@@ -1,3 +1,5 @@
+# Randomly sample reviews following the same score distribution.
+
 
 import os
 import random

@@ -1,3 +1,5 @@
+# Filter some words and assign each word an index.
+
 
 import os
 import string
@@ -50,8 +52,9 @@ def to_standard_path(path):
 
 
 dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-input_path = to_system_path("{0}/words.tsv".format("/".join(dir_path.split("/")[:-1])))
-output_path = to_system_path("{0}/word_map.tsv".format("/".join(dir_path.split("/")[:-1])))
+dir_path = "/".join(dir_path.split("/")[:-1])
+input_path = to_system_path("{0}/words.tsv".format(dir_path))
+output_path = to_system_path("{0}/word_map.tsv".format(dir_path))
 
 patterns = []
 for c in string.ascii_lowercase[:26]:
