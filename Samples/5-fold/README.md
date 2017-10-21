@@ -5,3 +5,6 @@ This is supposed to be used for 5-fold cross validation. We run the evaluation p
 For example, in round 1, we can select 1, 2, 3, 4 for training a model, 5 for verification. The next round, we may select 1, 2, 3, 5 for training, and 4 for verification.
 
 Each group has exact 40,000 reviews ordered by score, then document index. No two groups have common reviews (no duplicates).
+
+Scores distribution for all reviews and each group is shown below.
+![Scores Distribution](score_distribution.png)
