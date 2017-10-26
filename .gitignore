@@ -3,3 +3,9 @@
 build-*-Debug
 build-*-Release
 *.pro.user
+/reviews_Movies_and_TV_5.json
+/Preprocessing/output/extracted.tsv
+/Preprocessing/output/stemmed.tsv
+/Samples/samples_indices.tsv
+/Samples/samples.tsv
+/fastText/scripts/fasttext
