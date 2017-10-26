@@ -9,3 +9,4 @@ build-*-Release
 /Samples/samples_indices.tsv
 /Samples/samples.tsv
 /fastText/scripts/fasttext
+/fastText/scripts/fastText

@@ -48,8 +48,8 @@ model_path = to_system_path("{0}/model".format(tmp_dir))
 predict_path = to_system_path("{0}/labels".format(tmp_dir))
 
 
-def get_binary_precision_recall_accuracy_f1(reals, preds, true_value):
-    # Compute precision, recall, accuracy and f1-score for setting true_value as binary positive
+def get_binary_precision_recall_f1(reals, preds, true_value):
+    # Compute precision, recall and f1-score for setting true_value as binary positive
     bin_reals = []
     for label in reals:
         if label == true_value:
@@ -85,24 +85,25 @@ def get_binary_precision_recall_accuracy_f1(reals, preds, true_value):
         fn += 1
     p = float(tp) / (tp + fp)
     r = float(tp) / (tp + fn)
-    a = float(tp + tn) / (tp + tn + fp + fn)
     f = 2. * p * r / (p + r)
-    return p, r, a, f
+    return p, r, f
 
 
 def get_precision_recall_accuracy_f1(reals, preds):
     # Compute precision, recall, accuracy and f1-score for all classes
     ps = 0
     rs = 0
-    cs = 0
     fs = 0
     for i in range(1, 6):
-        p, r, a, f = get_binary_precision_recall_accuracy_f1(reals, preds, i)
+        p, r, f = get_binary_precision_recall_f1(reals, preds, i)
         ps += p
         rs += r
-        cs += a
         fs += f
-    return (ps / 5), (rs / 5), (cs / 5), (fs / 5)
+    corrects = 0
+    for i in range(0, len(reals)):
+        if reals[i] == preds[i]:
+            corrects += 1
+    return (ps / 5), (rs / 5), (float(corrects) / len(reals)), (fs / 5)
 
 
 precisions = []
