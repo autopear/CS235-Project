@@ -4,6 +4,7 @@
 import itertools
 import numpy as np
 import os
+import gzip
 import matplotlib.pyplot as plt
 
 
@@ -27,9 +28,9 @@ scores = []
 overall_scoures = [0, 0, 0, 0, 0]
 
 for i in range(0, 5):
-    input_path = "{0}{1}.tsv".format(input_prefix, i+1)
+    input_path = "{0}{1}.tsv.gzip".format(input_prefix, i+1)
     group_scores = [0, 0, 0, 0, 0]
-    with open(input_path, "r") as inf:
+    with gzip.open(input_path, "rt") as inf:
         for line in inf:
             line = line[:-1]
             if len(line) < 1:

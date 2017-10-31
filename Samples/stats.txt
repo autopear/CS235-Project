@@ -1,7 +1,7 @@
-Total # reviews: 1652602
-Score 1: 12356 / 102101
-Score 2: 12223 / 101001
-Score 3: 23921 / 197657
-Score 4: 45486 / 375849
-Score 5: 106014 / 875994
+Total # reviews: 505872
+Score 1: 11259 / 28479
+Score 2: 15732 / 39791
+Score 3: 31064 / 78572
+Score 4: 56782 / 143621
+Score 5: 85163 / 215409
 Total samples: 200000

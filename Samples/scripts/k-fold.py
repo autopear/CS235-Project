@@ -4,6 +4,8 @@
 
 import os
 import random
+import gzip
+import glob
 from operator import itemgetter
 
 
@@ -23,22 +25,30 @@ def to_standard_path(path):
 
 dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
 dir_path = "/".join(dir_path.split("/")[:-1])
-input_path = to_system_path("{0}/samples_indices.tsv".format(dir_path))
+input_paths = []
 output_prefix = to_system_path("{0}/5-fold/fold-".format(dir_path))
 
+if os.path.isfile(to_system_path("{0}/samples_indices.tsv.gzip".format(dir_path))):
+    input_paths.append(to_system_path("{0}/samples_indices.tsv.gzip".format(dir_path)))
+else:
+    for f in glob.glob(to_system_path("{0}/samples_indices-*.tsv.gzip".format(dir_path))):
+        input_paths.append(to_system_path(f))
+
 docs = []
-with open(input_path, "r") as inf:
-    for line in inf:
-        line = line[:-1]
-        if len(line) < 1:
-            continue
-        components = line.split("\t")
-        doc_idx = int(components[0])
-        score = int(components[1])
-        doc = components[2]
-        docs.append((doc_idx, score, doc))
-inf.close()
-print("Documents loaded")
+for input_path in input_paths:
+    with gzip.open(input_path, "rt") as inf:
+        for line in inf:
+            line = line[:-1]
+            if len(line) < 1:
+                continue
+            components = line.split("\t")
+            doc_idx = int(components[0])
+            score = int(components[1])
+            doc = components[2]
+            docs.append((doc_idx, score, doc))
+    inf.close()
+    print("Loaded {0}".format(input_path))
+print("{0} documents loaded".format(len(docs)))
 
 # Shuffle 3 times
 random.shuffle(docs)
@@ -51,7 +61,7 @@ for i in range(1, k+1):
     fold_docs = docs[0:fold_size]
     del docs[0:fold_size]
 
-    outf = open("{0}{1}.tsv".format(output_prefix, i), "w")
+    outf = gzip.open("{0}{1}.tsv.gzip".format(output_prefix, i), "wt")
     for (doc_idx, score, doc) in sorted(fold_docs, key=itemgetter(1, 0)):
         outf.write("{0}\t{1}\t{2}\n".format(doc_idx, score, doc))
     outf.close()
