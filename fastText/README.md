@@ -3,7 +3,7 @@ fastText
 
 This folder contains codes and results for [fastText](https://github.com/facebookresearch/fastText) algorithm.
 
-fastText accepts text as input, so first you need to revert the 5-fold files back to words. This can be done by [revert_word_index.py](scripts/revert_word_index.py). It will create 5 tsv files under data folder.
+fastText accepts text as input, so first you need to revert the 5-fold files back to words. This can be done by [revert_word_index.py](scripts/revert_word_index.py). It will create 5 tsv files (gzipped) under data folder.
 
 fastText can do binary classification and multiclass classification. But to compute precison, recall or F-1 score, labels must be binary. So I provide two scripts.
 

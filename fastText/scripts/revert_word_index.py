@@ -1,6 +1,7 @@
 # fastText accepts direct words, so revert 5 groups back to word instead of word indices
 
 import os
+import gzip
 
 num_folds = 5
 
@@ -37,11 +38,11 @@ inf.close()
 print("Word map loaded")
 
 for i in range(1, num_folds+1):
-    fold_path = "{0}{1}.tsv".format(fold_prefix, i)
+    fold_path = "{0}{1}.tsv.gzip".format(fold_prefix, i)
 
-    outf = open(to_system_path("{0}/fold-{1}.tsv".format(output_dir, i)), "w")
+    outf = gzip.open(to_system_path("{0}/fold-{1}.tsv.gzip".format(output_dir, i)), "wt")
 
-    with open(fold_path, "r") as inf:
+    with gzip.open(fold_path, "rt") as inf:
         for line in inf:
             line = line[:-1]
             if len(line) < 1:

@@ -2,6 +2,7 @@
 # This is a binary version of reviews. Score 4 and 5 are considered positive, 1 to 3 are negative.
 
 import os
+import gzip
 import shutil
 
 num_folds = 5
@@ -62,7 +63,7 @@ for test_fold in range(1, 1 + num_folds):
     for i in range(1, num_folds + 1):
         if i == test_fold:
             continue
-        with open("{0}{1}.tsv".format(fold_prefix, i), "r") as inf:
+        with gzip.open("{0}{1}.tsv.gzip".format(fold_prefix, i), "rt") as inf:
             for line in inf:
                 line = line[:-1]
                 if len(line) < 1:
@@ -71,16 +72,16 @@ for test_fold in range(1, 1 + num_folds):
                 score = int(components[1])
                 words = components[2]
                 if score > 3:
-                    train_file.write("__label__+ , {0}\n".format(words))
+                    train_file.write("__label__+ {0}\n".format(words))
                 else:
-                    train_file.write("__label__- , {0}\n".format(words))
+                    train_file.write("__label__- {0}\n".format(words))
         inf.close()
     train_file.close()
     print("Done training file")
 
     test_file = open(test_path, "w")
     test_labels = []
-    with open("{0}{1}.tsv".format(fold_prefix, test_fold), "r") as inf:
+    with gzip.open("{0}{1}.tsv.gzip".format(fold_prefix, test_fold), "rt") as inf:
         for line in inf:
             line = line[:-1]
             if len(line) < 1:
@@ -158,6 +159,10 @@ def get_recall(fold):
     return float(tps[fold]) / (tps[fold] + fns[fold])
 
 
+def get_specificity(fold):
+    return float(tns[fold]) / (tns[fold] + fps[fold])
+
+
 def get_accuracy(fold):
     return float(tps[fold] + tns[fold]) / (tps[fold] + tns[fold] + fps[fold] + fns[fold])
 
@@ -207,7 +212,13 @@ for i in range(0, num_folds):
     t = get_recall(i)
     rs.append(t)
     outf.write("  {0}".format(to_percentage(t)))
-outf.write("    {0}\nAccuracy: ".format(to_percentage(sum(rs) / num_folds)))
+outf.write("    {0}\nSPC:      ".format(to_percentage(sum(rs) / num_folds)))
+ss = []
+for i in range(0, num_folds):
+    t = get_specificity(i)
+    ss.append(t)
+    outf.write("  {0}".format(to_percentage(t)))
+outf.write("    {0}\nAccuracy: ".format(to_percentage(sum(ss) / num_folds)))
 cs = []
 for i in range(0, num_folds):
     t = get_accuracy(i)

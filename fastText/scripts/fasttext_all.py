@@ -1,6 +1,7 @@
 # Merge 4 folds and build fastText classifier from them. Then test against the remaining 1 fold.
 
 import os
+import gzip
 import shutil
 
 num_folds = 5
@@ -48,7 +49,7 @@ model_path = to_system_path("{0}/model".format(tmp_dir))
 predict_path = to_system_path("{0}/labels".format(tmp_dir))
 
 
-def get_binary_precision_recall_f1(reals, preds, true_value):
+def get_binary_precision_recall_f1_spc(reals, preds, true_value):
     # Compute precision, recall and f1-score for setting true_value as binary positive
     bin_reals = []
     for label in reals:
@@ -86,30 +87,34 @@ def get_binary_precision_recall_f1(reals, preds, true_value):
     p = float(tp) / (tp + fp)
     r = float(tp) / (tp + fn)
     f = 2. * p * r / (p + r)
-    return p, r, f
+    s = float(tn) / (tn + fp)
+    return p, r, f, s
 
 
-def get_precision_recall_accuracy_f1(reals, preds):
+def get_precision_recall_accuracy_f1_spc(reals, preds):
     # Compute precision, recall, accuracy and f1-score for all classes
     ps = 0
     rs = 0
     fs = 0
+    ss = 0
     for i in range(1, 6):
-        p, r, f = get_binary_precision_recall_f1(reals, preds, i)
+        p, r, f, s = get_binary_precision_recall_f1_spc(reals, preds, i)
         ps += p
         rs += r
         fs += f
+        ss += s
     corrects = 0
     for i in range(0, len(reals)):
         if reals[i] == preds[i]:
             corrects += 1
-    return (ps / 5), (rs / 5), (float(corrects) / len(reals)), (fs / 5)
+    return (ps / 5), (rs / 5), (float(corrects) / len(reals)), (fs / 5), (ss / 5)
 
 
 precisions = []
 recalls = []
 accuracies = []
 f1s = []
+spcs = []
 
 for test_fold in range(1, 1 + num_folds):
     print("Set fold {0} for testing".format(test_fold))
@@ -119,7 +124,7 @@ for test_fold in range(1, 1 + num_folds):
     for i in range(1, num_folds + 1):
         if i == test_fold:
             continue
-        with open("{0}{1}.tsv".format(fold_prefix, i), "r") as inf:
+        with gzip.open("{0}{1}.tsv.gzip".format(fold_prefix, i), "rt") as inf:
             for line in inf:
                 line = line[:-1]
                 if len(line) < 1:
@@ -127,14 +132,14 @@ for test_fold in range(1, 1 + num_folds):
                 components = line.split("\t")
                 score = int(components[1])
                 words = components[2]
-                train_file.write("__label__{0} , {1}\n".format(score, words))
+                train_file.write("__label__{0} {1}\n".format(score, words))
         inf.close()
     train_file.close()
     print("Done training file")
 
     test_file = open(test_path, "w")
     test_labels = []
-    with open("{0}{1}.tsv".format(fold_prefix, test_fold), "r") as inf:
+    with gzip.open("{0}{1}.tsv.gzip".format(fold_prefix, test_fold), "rt") as inf:
         for line in inf:
             line = line[:-1]
             if len(line) < 1:
@@ -170,11 +175,12 @@ for test_fold in range(1, 1 + num_folds):
         outf.write("{0}\t{1}\n".format(test_labels[i], predict_labels[i]))
     outf.close()
 
-    p, r, a, f = get_precision_recall_accuracy_f1(test_labels, predict_labels)
+    p, r, a, f, s = get_precision_recall_accuracy_f1_spc(test_labels, predict_labels)
     precisions.append(p)
     recalls.append(r)
     accuracies.append(a)
     f1s.append(f)
+    spcs.append(s)
 
     del test_labels, predict_labels
 
@@ -197,7 +203,10 @@ for i in range(0, num_folds):
 outf.write("    {0}\nRecall:   ".format(to_percentage(sum(precisions) / num_folds)))
 for i in range(0, num_folds):
     outf.write("  {0}".format(to_percentage(recalls[i])))
-outf.write("    {0}\nAccuracy: ".format(to_percentage(sum(recalls) / num_folds)))
+outf.write("    {0}\nSPC:      ".format(to_percentage(sum(recalls) / num_folds)))
+for i in range(0, num_folds):
+    outf.write("  {0}".format(to_percentage(spcs[i])))
+outf.write("    {0}\nAccuracy: ".format(to_percentage(sum(spcs) / num_folds)))
 for i in range(0, num_folds):
     outf.write("  {0}".format(to_percentage(accuracies[i])))
 outf.write("    {0}\nF-1 Score:".format(to_percentage(sum(accuracies) / num_folds)))
