@@ -5,6 +5,7 @@ This directory contains all Python scripts for ANN (Approximate Nearest Neighbor
 ## Required Libraries:
 * [numpy](http://www.numpy.org/)
 * [scipy](https://www.scipy.org/)
+* [PySparNN](https://github.com/facebookresearch/pysparnn) (Only the class is needed)
 
 ### [pysparnn](pysparnn/)
 Class library from Facebook's ANN.

@@ -30,7 +30,7 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
-    """ Convert \ to \ in path (mainly for Windows) """
+    """ Convert \ to / in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 

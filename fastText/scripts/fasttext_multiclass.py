@@ -17,7 +17,7 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
-    """ Convert \ to \ in path (mainly for Windows) """
+    """ Convert \ to / in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
@@ -121,7 +121,7 @@ if bin_found:
     precisions = []
     recalls = []
     accuracies = []
-    f1s = []
+    f1s = []  # F1 scores
     spcs = []  # Specificities
 
     for test_fold in range(1, 1 + num_folds):

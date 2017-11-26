@@ -1,11 +1,14 @@
-import os
-import gzip
+# Compute statistics for the actual labels versus the predicted labels, for multiclass weighted and unweighted versions
+
 import glob
+import gzip
 import math
+import os
 from operator import itemgetter
 
 
 def to_system_path(path):
+    """ Convert an input path to the current system style, \ for Windows, / for others """
     if os.name == "nt":
         return path.replace("/", "\\")
     else:
@@ -13,15 +16,19 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
+    """ Convert \ to / in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
-dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-dir_path = "/".join(dir_path.split("/")[:-1])
+dir_path = to_standard_path(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))  # Module directory
 output_dir = to_system_path("{0}/output".format(dir_path))
-label_prefixes = (to_system_path("{0}/multiclass_unweighted-".format(output_dir)), to_system_path("{0}/multiclass_weighted-".format(output_dir)))
+label_prefixes = (
+    to_system_path("{0}/multiclass_unweighted-".format(output_dir)),
+    to_system_path("{0}/multiclass_weighted-".format(output_dir))
+)
 output_path = to_system_path("{0}/result_multiclass.txt".format(output_dir))
 
+# Get the number of folds dynamically
 folds = []
 for fold_path in glob.glob("{0}*.tsv".format(label_prefixes[0])):
     folds.append(int(os.path.basename(fold_path)[22:-4]))
@@ -77,7 +84,7 @@ def get_precision_recall_accuracy_f1_spc(reals, preds):
     rs = 0
     fs = 0
     ss = 0
-    for i in range(1, 6):
+    for i in range(1, 1+num_folds):
         p, r, f, s = get_binary_precision_recall_f1_spc(reals, preds, i)
         ps += p
         rs += r
@@ -87,18 +94,17 @@ def get_precision_recall_accuracy_f1_spc(reals, preds):
     for i in range(0, len(reals)):
         if reals[i] == preds[i]:
             corrects += 1
-    return (ps / 5), (rs / 5), (float(corrects) / len(reals)), (fs / 5), (ss / 5)
+    return (ps / num_folds), (rs / num_folds), (float(corrects) / len(reals)), (fs / num_folds), (ss / num_folds)
 
 
 contents = []
 
 for label_prefix in label_prefixes:
-
     precisions = []
     recalls = []
     accuracies = []
-    f1s = []
-    spcs = []
+    f1s = []  # F1 Scores
+    spcs = []  # Specificities
 
     for predict_fold in folds:
         actual_labels = []
@@ -124,7 +130,9 @@ for label_prefix in label_prefixes:
 
 
     def to_percentage(r):
+        """ Convert a float number of percentage with 2 decimals """
         return "{:.2%}".format(r)
+
 
     lines = []
 
@@ -154,6 +162,7 @@ outf.write("Unweighted\n")
 outf.write(contents[0])
 outf.write("\n\nWeighted\n")
 outf.write(contents[1])
+outf.write("\n")
 outf.close()
 
 print("Done")

@@ -1,11 +1,14 @@
-import os
-import gzip
+# Compute statistics for the actual labels versus the predicted labels, for binary weighted and unweighted versions
+
 import glob
+import gzip
 import math
+import os
 from operator import itemgetter
 
 
 def to_system_path(path):
+    """ Convert an input path to the current system style, \ for Windows, / for others """
     if os.name == "nt":
         return path.replace("/", "\\")
     else:
@@ -13,13 +16,16 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
+    """ Convert \ to / in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
-dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-dir_path = "/".join(dir_path.split("/")[:-1])
+dir_path = to_standard_path(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))  # Module directory
 output_dir = to_system_path("{0}/output".format(dir_path))
-label_prefixes = (to_system_path("{0}/binary_unweighted-".format(output_dir)), to_system_path("{0}/binary_weighted-".format(output_dir)))
+label_prefixes = (
+    to_system_path("{0}/binary_unweighted-".format(output_dir)),
+    to_system_path("{0}/binary_weighted-".format(output_dir))
+)
 output_path = to_system_path("{0}/result_binary.txt".format(output_dir))
 
 folds = []
@@ -31,10 +37,10 @@ num_folds = len(folds)
 contents = []
 
 for label_prefix in label_prefixes:
-    tps = []
-    tns = []
-    fps = []
-    fns = []
+    tps = []  # True positive
+    tns = []  # True negative
+    fps = []  # False positive
+    fns = []  # False negative
 
     for predict_fold in folds:
         tp = 0
@@ -67,26 +73,32 @@ for label_prefix in label_prefixes:
 
 
     def get_precision(fold):
+        """ Compute precision for the give fold """
         return float(tps[fold]) / (tps[fold] + fps[fold])
 
 
     def get_recall(fold):
+        """ Compute recall for the give fold """
         return float(tps[fold]) / (tps[fold] + fns[fold])
 
 
     def get_specificity(fold):
+        """ Compute specificity for the give fold """
         return float(tns[fold]) / (tns[fold] + fps[fold])
 
 
     def get_accuracy(fold):
+        """ Compute accuracy for the give fold """
         return float(tps[fold] + tns[fold]) / (tps[fold] + tns[fold] + fps[fold] + fns[fold])
 
 
     def get_f1(p, r):
+        """ Compute F1 score for the give fold """
         return 2. * p * r / (p + r)
 
 
     def to_percentage(r):
+        """ Convert a float number of percentage with 2 decimals """
         return "{:.2%}".format(r)
 
 
@@ -95,10 +107,12 @@ for label_prefix in label_prefixes:
 
 
     def to_fixed_str(n):
+        """ Force converting all integers to a fixed length string (prepending spaces) """
         s = str(n)
         while len(s) < max_len:
             s = " {0}".format(s)
         return s
+
 
     lines = []
     
@@ -154,6 +168,7 @@ outf.write("Unweighted\n")
 outf.write(contents[0])
 outf.write("\n\nWeighted\n")
 outf.write(contents[1])
+outf.write("\n")
 outf.close()
 
 print("Done")
