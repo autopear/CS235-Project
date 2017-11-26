@@ -17,4 +17,4 @@ This folder contains codes and results for ANN (Approximate Nearest Neighbor) re
 Actual labels (column 1) and predicted labels (column 2) are stored under [output](output/) with the fold number (used as test sets) and script embedded in the filename. Results are also available at [result_multiclass.txt](output/result_multiclass.txt) and [result_binary.txt](output/result_binary.txt).
 
 ## License
-[BSD](../LICENSE)
+[BSD](LICENSE)
