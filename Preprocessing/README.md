@@ -13,3 +13,5 @@ Download, extract and parse gzipped json file of Amazon reviews.
 * extracted.tsv: Extracted raw reviews
 * stemmed.tsv: Stemmed reviews
 
+## License
+[LGPL](LICENSE)

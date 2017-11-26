@@ -1,8 +1,12 @@
 # scripts
 
-This directory contains all Python scripts for ANN (Approximate Nearest Neighbor) related work. Since our data is too big to fit into memory (over 20 GB estimated), we use Facebook's [ANN](https://github.com/facebookresearch/pysparnn) method as a replacement for kNN.
+This directory contains all Python scripts for ANN (Approximate Nearest Neighbor) related work. Since our data is too big to fit into memory (over 20 GB estimated), we use Facebook's [PySparNN](https://github.com/facebookresearch/pysparnn) method as a replacement for kNN.
 
-## [pysparnn](pysparnn/)
+## Required Libraries:
+* [numpy](http://www.numpy.org/)
+* [scipy](https://www.scipy.org/)
+
+### [pysparnn](pysparnn/)
 Class library from Facebook's ANN.
 
 ### [ann.py](ann.py)
@@ -14,3 +18,5 @@ Compute statistics for binary classification for both unweighted and weighted ve
 ### [stats_multiclass.py](stats_multiclass.py)
 Compute statistics for multiclass classification for both unweighted and weighted versions.
 
+## License
+[BSD](../LICENSE)

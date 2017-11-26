@@ -10,3 +10,6 @@ Multiclass version of fastText classificaton.
 
 ### [revert_word_index.py](revert_word_index.py)
 Convert reviews from word indices to text.
+
+## License
+[BSD](../LICENSE)
