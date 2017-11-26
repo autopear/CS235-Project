@@ -1,12 +1,13 @@
 # fastText accepts direct words, so revert 5 groups back to word instead of word indices
 
-import os
 import gzip
+import os
 
 num_folds = 5
 
 
 def to_system_path(path):
+    """ Convert an input path to the current system style, \ for Windows, / for others """
     if os.name == "nt":
         return path.replace("/", "\\")
     else:
@@ -14,11 +15,11 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
+    """ Convert \ to \ in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
-dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-dir_path = "/".join(dir_path.split("/")[:-1])
+dir_path = to_standard_path(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 output_dir = "{0}/data".format(dir_path)
 input_dir = "{0}/Samples".format("/".join(dir_path.split("/")[:-1]))
 word_map_path = to_system_path("{0}/word_map.tsv".format(input_dir))

@@ -10,12 +10,13 @@ import math
 from operator import itemgetter
 
 sample_size = 200000
-num_batches = 2
+num_batches = 2  # Number of split files to store the reviews. Github allows 100 MB per file only.
 min_num_words = 100  # Selected reviews must have at least 100 words
-backup_ratio = 0.05  # Keep extra 5% of reviews for backup
+backup_ratio = 0.05  # Keep extra 5% of reviews for backup in case some reviews are dropped in the processing
 
 
 def to_system_path(path):
+    """ Convert an input path to the current system style, \ for Windows, / for others """
     if os.name == "nt":
         return path.replace("/", "\\")
     else:
@@ -23,6 +24,7 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
+    """ Convert \ to \ in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
@@ -149,21 +151,25 @@ stop_words = (
     "yourselves"
 )
 
+# Construct a list of patterns of aaa, bbb, ccc, ..., zzz
 three_chars = []
 for c in string.ascii_lowercase[:26]:
     three_chars.append("{0}{0}{0}".format(c))
 
 
 def contains_three_chars(s):
+    """ Check if a string contains consecutive 3 the same characters """
     if any(cs in s for cs in three_chars):
         return True
     else:
         return False
 
 
-def process_words(words):
+def process_document(sentence):
+    """ Remove stop words, remove too short words, remove words that contain 3 consecutive characters
+        Remove too short documents after processing """
     r = []
-    for word in words.split(" "):
+    for word in sentence.split(" "):
         if (len(word)) < 2 or (word in stop_words) or (contains_three_chars(word)):
             continue
         else:
@@ -174,12 +180,13 @@ def process_words(words):
         return " ".join(r)
 
 
-dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-input_path = to_system_path("{0}/Preprocessing/output/stemmed.tsv".format("/".join(dir_path.split("/")[:-2])))
-sample_prefix = to_system_path("{0}/samples".format("/".join(dir_path.split("/")[:-1])))
-backup_path = to_system_path("{0}/samples_backup.tsv.gzip".format("/".join(dir_path.split("/")[:-1])))
-log_path = to_system_path("{0}/stats.txt".format("/".join(dir_path.split("/")[:-1])))
+dir_path = to_standard_path(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))  # Module directory
+input_path = to_system_path("{0}/Preprocessing/output/stemmed.tsv".format(os.path.dirname(dir_path)))
+sample_prefix = to_system_path("{0}/samples".format(dir_path))
+backup_path = to_system_path("{0}/samples_backup.tsv.gzip".format(dir_path))  # Backup reviews
+log_path = to_system_path("{0}/stats.txt".format(dir_path))  # Statistics of sampling
 
+# Read and process all reviews, save them according to their ratings
 reviews = {
     1: [],
     2: [],
@@ -197,16 +204,15 @@ with open(input_path, "r") as inf:
         components = line.split("\t")
         doc_idx = int(components[0])
         score = int(components[1])
-        review = process_words(components[2])
+        review = process_document(components[2])
         if len(review) > 0:
             t = reviews[score]
             t.append((doc_idx, review))
             reviews[score] = t
-        print(ln)
         ln += 1
 inf.close()
 
-counts = {}
+counts = {}  # Number of reviews per rating
 num_reviews = 0
 for score in range(1, 6):
     cnt = len(reviews[score])
@@ -223,7 +229,7 @@ else:
     bakf = gzip.open(backup_path, "wt")
     total_samples = 0
 
-    batch_size = math.ceil(float(sample_size) / num_batches)
+    batch_size = math.floor(float(sample_size) / num_batches)  # Number of reviews per batch file
 
     batch_id = -1
     outf = None
@@ -237,11 +243,12 @@ else:
 
     for score in range(1, 6):
         cnt = counts[score]
-        k = round(float(cnt) * sample_size / num_reviews)
-        t = round(backup_ratio * k)
+        k = round(float(cnt) * sample_size / num_reviews)  # Number of reviews per rating
+        t = round(backup_ratio * k)  # Number of backup reviews per rating
         total_samples += k
         logf.write("Score {0}: {1} / {2}\n".format(score, k, cnt))
-        samples = random.sample(reviews[score], t+k)
+        samples = random.sample(reviews[score], t+k)  # Sample enough reviews per rating
+        # Write first k reviews for normal file
         for doc_idx, review in sorted(samples[0:k], key=itemgetter(0)):
             outf.write("{0}\t{1}\t{2}\n".format(doc_idx, score, review))
             lines_written += 1
@@ -251,6 +258,7 @@ else:
                 if lines_written < sample_size:
                     batch_id += 1
                     outf = gzip.open("{0}-{1}.tsv.gzip".format(sample_prefix, batch_id), "wt")
+        # Write the last t reviews for backup
         for doc_idx, review in sorted(samples[k:t+k], key=itemgetter(0)):
             bakf.write("{0}\t{1}\t{2}\n".format(doc_idx, score, review))
         print("Done for score {0}".format(score))

@@ -5,13 +5,15 @@ import os
 import string
 
 
+# Manually add some words to drop
 filter_words = [
 ]
 
-min_word_freq = 3
+min_word_freq = 3  # A word must appear at least 3 times to be kept
 
 
 def to_system_path(path):
+    """ Convert an input path to the current system style, \ for Windows, / for others """
     if os.name == "nt":
         return path.replace("/", "\\")
     else:
@@ -19,11 +21,11 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
+    """ Convert \ to \ in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
-dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-dir_path = "/".join(dir_path.split("/")[:-1])
+dir_path = to_standard_path(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))  # Module folder
 input_path = to_system_path("{0}/words.tsv".format(dir_path))
 output_path = to_system_path("{0}/word_map.tsv".format(dir_path))
 

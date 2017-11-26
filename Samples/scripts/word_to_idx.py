@@ -1,15 +1,16 @@
 # Based on the word index map, convert all reviews to use word indices. Words without index will be skipped.
 
 
-import os
 import glob
 import gzip
+import os
 
 
-min_num_words = 100
+min_num_words = 100  # Minimum number of words per review to be kept
 
 
 def to_system_path(path):
+    """ Convert an input path to the current system style, \ for Windows, / for others """
     if os.name == "nt":
         return path.replace("/", "\\")
     else:
@@ -17,11 +18,11 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
+    """ Convert \ to \ in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
-dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-dir_path = "/".join(dir_path.split("/")[:-1])
+dir_path = to_standard_path(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))  # Module folder
 backup_path = to_system_path("{0}/samples_backup.tsv.gzip".format(dir_path))
 map_path = to_system_path("{0}/word_map.tsv".format(dir_path))
 
@@ -59,9 +60,11 @@ with gzip.open(backup_path, "rt") as inf:
         t.append("{0}\t{1}\t{2}\n".format(doc_idx, score, " ".join(indices)))
         backups[score-1] = t
 inf.close()
+print("Backup loaded")
 
 
 def save_file(inp, outp):
+    """ Convert reviews from text to word indices, fill up with backup reviews if needed """
     outf = gzip.open(outp, "wt")
     with gzip.open(inp, "rt") as inf:
         for line in inf:
@@ -103,6 +106,5 @@ else:
         fn = fn.replace("samples-", "samples_indices-")
         output_path = to_system_path("{0}/{1}".format(dir_path, fn))
         save_file(input_path, output_path)
-
 
 print("Done")

@@ -1,3 +1,8 @@
+/*
+ * Command line application to stem an input text file. Porter2 English Stemmer is used.
+ * Source: http://snowball.tartarus.org/algorithms/english/stemmer.html
+ */
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -69,17 +74,19 @@ int main(int argc, char *argv[])
             qDebug("The input file must have 4 columns.");
             continue;
         }
-        QString idx = contents.at(0);
-        QString score = contents.at(1);
+        QString idx = contents.at(0); //Document ID
+        QString score = contents.at(1); //Rating
         QStringList summmary = Stemmer::stemSentence(contents.at(2));
         QStringList review = Stemmer::stemSentence(contents.at(3));
 
+        /* Merge summary with review */
         summmary.append(review);
         review.clear();
 
         QString stems = summmary.join(" ");
         summmary.clear();
 
+        /* Skip reviews shorter than 100 words */
         if (stems.size() < 100)
             continue;
 

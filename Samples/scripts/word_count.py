@@ -1,13 +1,14 @@
 # Count all word frequencies through all reviews.
 
 
-import os
-import gzip
 import glob
+import gzip
+import os
 from operator import itemgetter
 
 
 def to_system_path(path):
+    """ Convert an input path to the current system style, \ for Windows, / for others """
     if os.name == "nt":
         return path.replace("/", "\\")
     else:
@@ -15,21 +16,22 @@ def to_system_path(path):
 
 
 def to_standard_path(path):
+    """ Convert \ to \ in path (mainly for Windows) """
     return path.replace("\\", "/")
 
 
-dir_path = to_standard_path(os.path.dirname(os.path.realpath(__file__)))
-dir_path = "/".join(dir_path.split("/")[:-1])
+dir_path = to_standard_path(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))  # Module folder
 input_paths = []
 output_path = to_system_path("{0}/words.tsv".format(dir_path))
 
+# Scan input files
 if os.path.isfile(to_system_path("{0}/samples.tsv.gzip".format(dir_path))):
     input_paths.append(to_system_path("{0}/samples.tsv.gzip".format(dir_path)))
 else:
     for f in glob.glob(to_system_path("{0}/samples-*.tsv.gzip".format(dir_path))):
         input_paths.append(to_system_path(f))
 
-word_bag = {}
+word_bag = {}  # Count word frequencies
 
 for input_path in input_paths:
     with gzip.open(input_path, "rt") as inf:
