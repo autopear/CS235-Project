@@ -138,7 +138,6 @@ for label_prefix in label_prefixes:
 
     # Save result
     lines.append("Precision:")
-    ps = []
     for i in range(0, num_folds):
         lines.append("  {0}".format(to_percentage(precisions[i])))
     lines.append("    {0}\nRecall:   ".format(to_percentage(sum(precisions) / num_folds)))

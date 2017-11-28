@@ -207,7 +207,6 @@ if bin_found:
     # Save result
     outf = open(to_system_path("{0}/result_multiclass.txt".format(output_dir)), "w")
     outf.write("Precision:")
-    ps = []
     for i in range(0, num_folds):
         outf.write("  {0}".format(to_percentage(precisions[i])))
     outf.write("    {0}\nRecall:   ".format(to_percentage(sum(precisions) / num_folds)))
