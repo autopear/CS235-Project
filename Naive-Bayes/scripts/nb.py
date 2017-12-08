@@ -147,6 +147,8 @@ for test_fold in folds:
     train_freqs = None
     train_lens = None
 
+    prioris_multi = [0, 0, 0, 0, 0]
+
     # Construct training data
     for train_fold in folds:
         if train_fold == test_fold:
@@ -158,7 +160,19 @@ for test_fold in folds:
         else:
             train_freqs = train_freqs + freqs[train_fold-1]
             train_lens = train_lens + lengths[train_fold-1]
+
+        for score in labels[train_fold-1]:
+            prioris_multi[score-1] = prioris_multi[score-1] + 1
     print("Done training data")
+
+    train_size = len(labels[0]) * (num_folds-1)
+
+    prioris_bin = [
+        math.log(float(prioris_multi[0] + prioris_multi[1] + prioris_multi[2]) / train_size),
+        math.log(float(prioris_multi[3] + prioris_multi[4]) / train_size)
+    ]
+    for i in range(0, 5):
+        prioris_multi[i] = math.log(float(prioris_multi[i]) / train_size)
 
     vs = train_freqs.shape[1]  # Vocabulary size
 
@@ -190,11 +204,11 @@ for test_fold in folds:
         vec = tests[i].toarray()[0]
         test_probs = [0, 0, 0, 0, 0]
         for s in range(0, 5):
-            test_probs[s] = numpy.dot(probs_multi[s], vec)  # Dot product, sum of prob * freq
+            test_probs[s] = prioris_multi[s] + numpy.dot(probs_multi[s], vec)  # Dot product, priori + sum of prob * freq
         predict_labels_multi.append(find_label(test_probs) + 1)
 
-        test_n = numpy.dot(probs_bin[0], vec)  # Dot product, sum of log(prob) * freq
-        test_p = numpy.dot(probs_bin[1], vec)  # Dot product, sum of log(prob) * freq
+        test_n = prioris_bin[0] + numpy.dot(probs_bin[0], vec)  # Dot product, priori + sum of log(prob) * freq
+        test_p = prioris_bin[1] + numpy.dot(probs_bin[1], vec)  # Dot product, priori + sum of log(prob) * freq
         if test_n < test_p:
             predict_labels_bin.append("+")
         else:
