@@ -241,9 +241,15 @@ else:
 
     lines_written = 0
 
+    ks = 0
+
     for score in range(1, 6):
         cnt = counts[score]
         k = round(float(cnt) * sample_size / num_reviews)  # Number of reviews per rating
+        if score == 5:
+            k = sample_size - ks  # Fix rounding error
+        else:
+            ks += k
         t = round(backup_ratio * k)  # Number of backup reviews per rating
         total_samples += k
         logf.write("Score {0}: {1} / {2}\n".format(score, k, cnt))

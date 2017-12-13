@@ -84,7 +84,7 @@ for fold in folds:
     start_idx = num_docs*(fold-1)
     for i in range(0, num_docs):
         vecs[i] = model.docvecs[start_idx+i]
-    numpy.save(mtx_path, mtx) # Save vectors to binary file
+    numpy.save(mtx_path, vecs) # Save vectors to binary file
 
     # Save labels
     labelf = open(label_path, "w")
