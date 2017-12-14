@@ -1,6 +1,6 @@
 import os
 import random
-import linecache
+import gzip
 import numpy as np
 import scipy.sparse
 import itertools
@@ -24,27 +24,26 @@ def load_word_map():
 # Returns tf of a fold and respective labels
 def get_fold_tf(fold_num, num_words, sample_indices):
     folder_path = os.path.join("..", "Samples", "5-fold")
-    path = os.path.join(folder_path, "fold-" + str(fold_num) + ".tsv")
+    path = os.path.join(folder_path, "fold-" + str(fold_num) + ".tsv.gzip")
 
     doc_idx = 0
     term_freq = dok_matrix((len(sample_indices), num_words))
     labels = []
-    for i in sample_indices:
-        line = linecache.getline(path, i)
-        doc_features = line.split()
-        doc_length = len(doc_features[2:])
-
-        label = -1
-        if int(doc_features[1]) >= 4:
-            label = 1
-
-        labels.append(label)
-
-        for word_idx in doc_features[2:]:
-            term_freq[doc_idx, int(word_idx) - 1] += 1
-
-        term_freq[doc_idx, :] /= doc_length
-        doc_idx += 1
+    with gzip.open(path, 'r') as file:
+        doc_idx = 0
+        term_freq = dok_matrix((len(sample_indices), num_words))
+        labels = []
+        
+        for i, line in enumerate(file):
+            if i in sample_indices:
+                doc_features = line.split()
+                doc_length = len(doc_features[2:])
+                labels.append(int(doc_features[1]))
+                for word_idx in doc_features[2:]:
+                    term_freq[doc_idx, int(word_idx)-1] += 1
+                    
+                term_freq[doc_idx, :] /= doc_length
+                doc_idx += 1
 
     term_freq = coo_matrix.log1p(coo_matrix(term_freq))
 
@@ -63,17 +62,17 @@ def get_fold_idf(fold_nums, num_words, sample_indices):
     folder_path = os.path.join("..", "Samples", "5-fold")
     for fold_num in fold_nums:
         if 1 <= fold_num <= 5:
-            path = os.path.join(folder_path, "fold-" + str(fold_num) + ".tsv")
-            for i in sample_indices:
-                line = linecache.getline(path, i)
-                doc_features = line.split()
-
-                # Don't want to double count a word we have already seen in a document
-                seen_words = set()
-                for word_idx in doc_features[2:]:
-                    if int(word_idx) - 1 not in seen_words:
-                        id_freq[0, int(word_idx) - 1] += 1
-                        seen_words.add(int(word_idx) - 1)
+            path = os.path.join(folder_path, "fold-" + str(fold_num) + ".tsv.gzip")
+            
+            with gzip.open(path, "r") as file:
+                for i, line in enumerate(file):
+                    if i in sample_indices:
+                        doc_features = line.split()
+                        seen_words = set()
+                        for word_idx in doc_features[2:]:
+                            if int(word_idx)-1 not in seen_words:
+                                id_freq[0, int(word_idx)-1] += 1
+                                seen_words.add(int(word_idx)-1)
 
     id_freq = coo_matrix(np.log(1 + (num_total_doc / id_freq)))
 
@@ -97,7 +96,7 @@ if __name__ == "__main__":
     folds = [1, 2, 3, 4, 5]
 
     # Indices of file to sample from
-    indices = random.sample(range(0, 40000-1), 1250)
+    indices = random.sample(range(0, 40000-1), 2500)
 
     for fold in folds:
         tf_path = os.path.join(tf_folder_path, "tf_fold_" + str(fold))
