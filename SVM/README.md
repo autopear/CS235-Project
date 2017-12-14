@@ -8,6 +8,7 @@ The other implementation is from the `sklearn` package.
 Samples from each fold to compute the tf and idf of the data.
 The matrices are stored in `tf-idf_data/tf` and `tf-idf_data/idf` for each fold respectively.
 Each `.npz` file has the content of the numbered folds in its name.
+** This script takes a long time to run on the data set.
 
 ## lsi.py
 Computes the tf-idf of the matrices from the above file, `tf-idf.py`.
